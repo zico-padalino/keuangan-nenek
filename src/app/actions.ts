@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { deleteBuktiImage, uploadBuktiImage } from "@/lib/storage";
 
 function revalidateApp() {
   revalidatePath("/dashboard");
@@ -19,6 +20,12 @@ async function requireUser() {
     return { supabase, user: null, error: "Login dulu untuk mengubah data." };
   }
   return { supabase, user, error: null };
+}
+
+function getImageFile(formData: FormData) {
+  const value = formData.get("image");
+  if (!value || !(value instanceof File) || value.size === 0) return null;
+  return value;
 }
 
 export async function addMember(formData: FormData) {
@@ -66,7 +73,10 @@ export async function addContribution(formData: FormData) {
   const periodMonth = Number(formData.get("period_month") || 0);
   const periodYear = Number(formData.get("period_year") || 0);
   const note = String(formData.get("note") || "").trim() || null;
-  const paidAt = String(formData.get("paid_at") || "") || new Date().toISOString().slice(0, 10);
+  const paidAt =
+    String(formData.get("paid_at") || "") ||
+    new Date().toISOString().slice(0, 10);
+  const image = getImageFile(formData);
 
   if (!memberId) return { error: "Pilih anggota." };
   if (!amount || amount <= 0) return { error: "Jumlah iuran tidak valid." };
@@ -75,6 +85,18 @@ export async function addContribution(formData: FormData) {
   const { supabase, user, error: authError } = await requireUser();
   if (authError) return { error: authError };
 
+  let imagePath: string | null = null;
+  if (image) {
+    const uploaded = await uploadBuktiImage(
+      supabase,
+      image,
+      "contributions",
+      user!.id,
+    );
+    if (uploaded.error) return { error: uploaded.error };
+    imagePath = uploaded.path ?? null;
+  }
+
   const { error } = await supabase.from("contributions").insert({
     member_id: memberId,
     amount,
@@ -82,10 +104,14 @@ export async function addContribution(formData: FormData) {
     period_year: periodYear,
     note,
     paid_at: paidAt,
+    image_path: imagePath,
     created_by: user!.id,
   });
 
-  if (error) return { error: error.message };
+  if (error) {
+    await deleteBuktiImage(supabase, imagePath);
+    return { error: error.message };
+  }
 
   revalidateApp();
   return { ok: true };
@@ -95,9 +121,16 @@ export async function deleteContribution(id: string) {
   const { supabase, error: authError } = await requireUser();
   if (authError) return { error: authError };
 
+  const { data } = await supabase
+    .from("contributions")
+    .select("image_path")
+    .eq("id", id)
+    .maybeSingle();
+
   const { error } = await supabase.from("contributions").delete().eq("id", id);
   if (error) return { error: error.message };
 
+  await deleteBuktiImage(supabase, data?.image_path);
   revalidateApp();
   return { ok: true };
 }
@@ -109,6 +142,7 @@ export async function addExpense(formData: FormData) {
   const spentAt =
     String(formData.get("spent_at") || "") ||
     new Date().toISOString().slice(0, 10);
+  const image = getImageFile(formData);
 
   if (!amount || amount <= 0) return { error: "Jumlah pengeluaran tidak valid." };
   if (!description) return { error: "Keterangan wajib diisi." };
@@ -116,15 +150,31 @@ export async function addExpense(formData: FormData) {
   const { supabase, user, error: authError } = await requireUser();
   if (authError) return { error: authError };
 
+  let imagePath: string | null = null;
+  if (image) {
+    const uploaded = await uploadBuktiImage(
+      supabase,
+      image,
+      "expenses",
+      user!.id,
+    );
+    if (uploaded.error) return { error: uploaded.error };
+    imagePath = uploaded.path ?? null;
+  }
+
   const { error } = await supabase.from("expenses").insert({
     amount,
     category,
     description,
     spent_at: spentAt,
+    image_path: imagePath,
     created_by: user!.id,
   });
 
-  if (error) return { error: error.message };
+  if (error) {
+    await deleteBuktiImage(supabase, imagePath);
+    return { error: error.message };
+  }
 
   revalidateApp();
   return { ok: true };
@@ -134,9 +184,16 @@ export async function deleteExpense(id: string) {
   const { supabase, error: authError } = await requireUser();
   if (authError) return { error: authError };
 
+  const { data } = await supabase
+    .from("expenses")
+    .select("image_path")
+    .eq("id", id)
+    .maybeSingle();
+
   const { error } = await supabase.from("expenses").delete().eq("id", id);
   if (error) return { error: error.message };
 
+  await deleteBuktiImage(supabase, data?.image_path);
   revalidateApp();
   return { ok: true };
 }

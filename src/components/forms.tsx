@@ -71,6 +71,16 @@ export function ContributionForm({
         <label htmlFor="note">Catatan (opsional)</label>
         <input id="note" name="note" placeholder="Transfer BCA / cash" />
       </div>
+      <div className="field">
+        <label htmlFor="contribution_image">Bukti transfer (opsional)</label>
+        <input
+          id="contribution_image"
+          name="image"
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+        />
+        <p className="mt-1 text-xs text-[var(--ink-soft)]">JPG/PNG/WEBP, maks. 5 MB</p>
+      </div>
       {error ? <p className="text-sm text-[var(--danger)]">{error}</p> : null}
       <button className="btn btn-primary" disabled={pending || members.length === 0}>
         {pending ? "Menyimpan..." : "Catat iuran"}
@@ -141,6 +151,16 @@ export function ExpenseForm() {
           type="date"
           defaultValue={new Date().toISOString().slice(0, 10)}
         />
+      </div>
+      <div className="field">
+        <label htmlFor="expense_image">Foto struk / bukti (opsional)</label>
+        <input
+          id="expense_image"
+          name="image"
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+        />
+        <p className="mt-1 text-xs text-[var(--ink-soft)]">JPG/PNG/WEBP, maks. 5 MB</p>
       </div>
       {error ? <p className="text-sm text-[var(--danger)]">{error}</p> : null}
       <button className="btn btn-primary" disabled={pending}>

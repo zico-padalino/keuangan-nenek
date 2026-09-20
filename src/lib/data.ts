@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getBuktiPublicUrl } from "@/lib/storage";
 import type {
   Contribution,
   Expense,
@@ -87,6 +88,7 @@ export async function getDashboardData(month: number, year: number) {
       date: c.paid_at,
       title: `Iuran ${c.members?.name ?? "Anggota"}`,
       subtitle: c.note || "Setoran keluarga",
+      imageUrl: getBuktiPublicUrl(c.image_path),
     })),
     ...expenses.map((e) => ({
       kind: "expense" as const,
@@ -97,6 +99,7 @@ export async function getDashboardData(month: number, year: number) {
       subtitle:
         EXPENSE_CATEGORIES.find((c) => c.value === e.category)?.label ||
         e.category,
+      imageUrl: getBuktiPublicUrl(e.image_path),
     })),
   ].sort((a, b) => (a.date < b.date ? 1 : -1));
 

@@ -29,11 +29,38 @@ export function HistoryList({
           key={`${item.kind}-${item.id}`}
           className="flex items-start justify-between gap-3 border-b border-[var(--line)] pb-3 last:border-0"
         >
-          <div>
-            <p className="font-semibold">{item.title}</p>
-            <p className="text-sm text-[var(--ink-soft)]">
-              {item.subtitle} · {formatDate(item.date)}
-            </p>
+          <div className="flex min-w-0 flex-1 gap-3">
+            {item.imageUrl ? (
+              <a
+                href={item.imageUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="shrink-0 overflow-hidden rounded-xl border border-[var(--line)] bg-white"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.imageUrl}
+                  alt={`Bukti ${item.title}`}
+                  className="h-16 w-16 object-cover"
+                />
+              </a>
+            ) : null}
+            <div className="min-w-0">
+              <p className="font-semibold">{item.title}</p>
+              <p className="text-sm text-[var(--ink-soft)]">
+                {item.subtitle} · {formatDate(item.date)}
+              </p>
+              {item.imageUrl ? (
+                <a
+                  href={item.imageUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 inline-block text-sm font-medium text-[var(--accent)]"
+                >
+                  Lihat bukti
+                </a>
+              ) : null}
+            </div>
           </div>
           <div className="text-right">
             <p

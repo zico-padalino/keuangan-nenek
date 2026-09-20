@@ -34,6 +34,7 @@ create table if not exists public.contributions (
   period_month int not null check (period_month between 1 and 12),
   period_year int not null check (period_year >= 2000),
   note text,
+  image_path text,
   paid_at date not null default current_date,
   created_by uuid references public.profiles (id) on delete set null,
   created_at timestamptz not null default now()
@@ -44,6 +45,7 @@ create table if not exists public.expenses (
   amount numeric(14, 2) not null check (amount > 0),
   category text not null default 'umum',
   description text not null,
+  image_path text,
   spent_at date not null default current_date,
   created_by uuid references public.profiles (id) on delete set null,
   created_at timestamptz not null default now()
@@ -108,3 +110,44 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Storage bukti transfer / struk (baca publik, upload hanya login)
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'bukti',
+  'bukti',
+  true,
+  5242880,
+  array['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+)
+on conflict (id) do update
+set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "bukti_public_read" on storage.objects;
+drop policy if exists "bukti_auth_insert" on storage.objects;
+drop policy if exists "bukti_auth_update" on storage.objects;
+drop policy if exists "bukti_auth_delete" on storage.objects;
+
+create policy "bukti_public_read"
+on storage.objects for select
+to anon, authenticated
+using (bucket_id = 'bukti');
+
+create policy "bukti_auth_insert"
+on storage.objects for insert
+to authenticated
+with check (bucket_id = 'bukti');
+
+create policy "bukti_auth_update"
+on storage.objects for update
+to authenticated
+using (bucket_id = 'bukti')
+with check (bucket_id = 'bukti');
+
+create policy "bukti_auth_delete"
+on storage.objects for delete
+to authenticated
+using (bucket_id = 'bukti');

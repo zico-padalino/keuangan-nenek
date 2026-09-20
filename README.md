@@ -8,9 +8,9 @@ Stack: **Next.js** (Vercel) + **Supabase** (database & auth, free tier).
 
 - Login / daftar keluarga
 - Dashboard saldo kas (total masuk − total keluar)
-- Input iuran per anggota + periode bulan
+- Input iuran per anggota + periode bulan (+ bukti transfer opsional)
 - Status lunas / belum bayar per orang
-- Input pengeluaran dengan kategori
+- Input pengeluaran dengan kategori (+ foto struk opsional)
 - Riwayat transaksi (bisa dihapus)
 - Kelola anggota patungan
 - Atur nama panggilan nenek & target iuran bulanan
@@ -61,9 +61,10 @@ Di Supabase → **Authentication → URL Configuration**, tambahkan URL Vercel k
 3. Login hanya untuk **CRUD**: input iuran/pengeluaran, kelola anggota, pengaturan.
 4. Admin keluarga isi daftar **Anggota**, lalu setiap bulan catat iuran & pengeluaran.
 
-Jika project Supabase sudah pernah di-setup sebelumnya, jalankan juga
-[`supabase/public-read.sql`](./supabase/public-read.sql) agar data monitoring
-bisa dibaca tanpa login.
+Jika project Supabase sudah pernah di-setup sebelumnya, jalankan juga:
+
+- [`supabase/public-read.sql`](./supabase/public-read.sql) — monitoring tanpa login
+- [`supabase/storage-bukti.sql`](./supabase/storage-bukti.sql) — upload bukti gambar
 
 ## Catatan keamanan
 

@@ -26,6 +26,7 @@ export type Contribution = {
   period_month: number;
   period_year: number;
   note: string | null;
+  image_path: string | null;
   paid_at: string;
   created_by: string | null;
   created_at: string;
@@ -37,6 +38,7 @@ export type Expense = {
   amount: number;
   category: string;
   description: string;
+  image_path: string | null;
   spent_at: string;
   created_by: string | null;
   created_at: string;
@@ -55,6 +57,7 @@ export type HistoryItem =
       date: string;
       title: string;
       subtitle: string;
+      imageUrl: string | null;
     }
   | {
       kind: "expense";
@@ -63,6 +66,7 @@ export type HistoryItem =
       date: string;
       title: string;
       subtitle: string;
+      imageUrl: string | null;
     };
 
 export const EXPENSE_CATEGORIES = [
