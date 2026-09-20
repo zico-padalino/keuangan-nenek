@@ -5,7 +5,13 @@ import { deleteContribution, deleteExpense } from "@/app/actions";
 import { formatDate, formatRp } from "@/lib/format";
 import type { HistoryItem } from "@/lib/types";
 
-export function HistoryList({ items }: { items: HistoryItem[] }) {
+export function HistoryList({
+  items,
+  canEdit = false,
+}: {
+  items: HistoryItem[];
+  canEdit?: boolean;
+}) {
   const [pending, startTransition] = useTransition();
 
   if (items.length === 0) {
@@ -39,22 +45,24 @@ export function HistoryList({ items }: { items: HistoryItem[] }) {
               {item.kind === "contribution" ? "+" : "−"}
               {formatRp(item.amount)}
             </p>
-            <button
-              type="button"
-              className="btn btn-danger mt-1"
-              disabled={pending}
-              onClick={() => {
-                startTransition(async () => {
-                  if (item.kind === "contribution") {
-                    await deleteContribution(item.id);
-                  } else {
-                    await deleteExpense(item.id);
-                  }
-                });
-              }}
-            >
-              Hapus
-            </button>
+            {canEdit ? (
+              <button
+                type="button"
+                className="btn btn-danger mt-1"
+                disabled={pending}
+                onClick={() => {
+                  startTransition(async () => {
+                    if (item.kind === "contribution") {
+                      await deleteContribution(item.id);
+                    } else {
+                      await deleteExpense(item.id);
+                    }
+                  });
+                }}
+              >
+                Hapus
+              </button>
+            ) : null}
           </div>
         </li>
       ))}

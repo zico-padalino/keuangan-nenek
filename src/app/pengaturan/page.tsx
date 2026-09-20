@@ -18,7 +18,11 @@ export default async function PengaturanPage() {
 
   return (
     <main className="pb-16">
-      <AppHeader nenekName={settings.nenek_name} userName={profile?.full_name} />
+      <AppHeader
+        nenekName={settings.nenek_name}
+        userName={profile?.full_name}
+        isLoggedIn
+      />
       <div className="shell mt-6">
         <section className="panel fade-up p-5 sm:p-7">
           <h2

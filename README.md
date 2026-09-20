@@ -57,12 +57,15 @@ Di Supabase → **Authentication → URL Configuration**, tambahkan URL Vercel k
 ## Alur pakai untuk keluarga
 
 1. Satu orang setup Supabase + deploy.
-2. Anggota keluarga daftar / login di app yang sama.
-3. Admin keluarga isi daftar **Anggota** (nama saudara yang ikut iuran).
-4. Setiap bulan catat siapa bayar di **Input iuran**.
-5. Catat belanja obat, makan, dll di **Input pengeluaran**.
-6. Lihat **Saldo** dan **Siapa sudah bayar** di dashboard.
+2. **Monitoring** (saldo, status bayar, riwayat) bisa dibuka tanpa login.
+3. Login hanya untuk **CRUD**: input iuran/pengeluaran, kelola anggota, pengaturan.
+4. Admin keluarga isi daftar **Anggota**, lalu setiap bulan catat iuran & pengeluaran.
+
+Jika project Supabase sudah pernah di-setup sebelumnya, jalankan juga
+[`supabase/public-read.sql`](./supabase/public-read.sql) agar data monitoring
+bisa dibaca tanpa login.
 
 ## Catatan keamanan
 
-Schema memakai RLS sederhana: semua user yang sudah login bisa baca/tulis data kas. Cocok untuk app privat satu keluarga. Jangan sebarkan URL ke publik; hanya bagikan ke saudara.
+Baca data kas terbuka untuk siapa saja yang punya URL. Ubah/hapus data hanya
+untuk user yang sudah login. Cocok untuk keluarga; jangan sebarkan URL ke publik.

@@ -10,11 +10,24 @@ function revalidateApp() {
   revalidatePath("/pengaturan");
 }
 
+async function requireUser() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { supabase, user: null, error: "Login dulu untuk mengubah data." };
+  }
+  return { supabase, user, error: null };
+}
+
 export async function addMember(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
   if (!name) return { error: "Nama anggota wajib diisi." };
 
-  const supabase = await createClient();
+  const { supabase, error: authError } = await requireUser();
+  if (authError) return { error: authError };
+
   const { error } = await supabase.from("members").insert({ name });
   if (error) return { error: error.message };
 
@@ -23,7 +36,9 @@ export async function addMember(formData: FormData) {
 }
 
 export async function toggleMember(id: string, active: boolean) {
-  const supabase = await createClient();
+  const { supabase, error: authError } = await requireUser();
+  if (authError) return { error: authError };
+
   const { error } = await supabase
     .from("members")
     .update({ active })
@@ -35,7 +50,9 @@ export async function toggleMember(id: string, active: boolean) {
 }
 
 export async function deleteMember(id: string) {
-  const supabase = await createClient();
+  const { supabase, error: authError } = await requireUser();
+  if (authError) return { error: authError };
+
   const { error } = await supabase.from("members").delete().eq("id", id);
   if (error) return { error: error.message };
 
@@ -55,10 +72,8 @@ export async function addContribution(formData: FormData) {
   if (!amount || amount <= 0) return { error: "Jumlah iuran tidak valid." };
   if (!periodMonth || !periodYear) return { error: "Periode tidak valid." };
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user, error: authError } = await requireUser();
+  if (authError) return { error: authError };
 
   const { error } = await supabase.from("contributions").insert({
     member_id: memberId,
@@ -67,7 +82,7 @@ export async function addContribution(formData: FormData) {
     period_year: periodYear,
     note,
     paid_at: paidAt,
-    created_by: user?.id ?? null,
+    created_by: user!.id,
   });
 
   if (error) return { error: error.message };
@@ -77,7 +92,9 @@ export async function addContribution(formData: FormData) {
 }
 
 export async function deleteContribution(id: string) {
-  const supabase = await createClient();
+  const { supabase, error: authError } = await requireUser();
+  if (authError) return { error: authError };
+
   const { error } = await supabase.from("contributions").delete().eq("id", id);
   if (error) return { error: error.message };
 
@@ -96,17 +113,15 @@ export async function addExpense(formData: FormData) {
   if (!amount || amount <= 0) return { error: "Jumlah pengeluaran tidak valid." };
   if (!description) return { error: "Keterangan wajib diisi." };
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user, error: authError } = await requireUser();
+  if (authError) return { error: authError };
 
   const { error } = await supabase.from("expenses").insert({
     amount,
     category,
     description,
     spent_at: spentAt,
-    created_by: user?.id ?? null,
+    created_by: user!.id,
   });
 
   if (error) return { error: error.message };
@@ -116,7 +131,9 @@ export async function addExpense(formData: FormData) {
 }
 
 export async function deleteExpense(id: string) {
-  const supabase = await createClient();
+  const { supabase, error: authError } = await requireUser();
+  if (authError) return { error: authError };
+
   const { error } = await supabase.from("expenses").delete().eq("id", id);
   if (error) return { error: error.message };
 
@@ -131,7 +148,9 @@ export async function updateSettings(formData: FormData) {
   if (!nenekName) return { error: "Nama panggilan wajib diisi." };
   if (monthlyDues < 0) return { error: "Iuran bulanan tidak valid." };
 
-  const supabase = await createClient();
+  const { supabase, error: authError } = await requireUser();
+  if (authError) return { error: authError };
+
   const { error } = await supabase
     .from("settings")
     .update({
@@ -150,5 +169,5 @@ export async function updateSettings(formData: FormData) {
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/login");
+  redirect("/dashboard");
 }

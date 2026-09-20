@@ -64,17 +64,28 @@ alter table public.members enable row level security;
 alter table public.contributions enable row level security;
 alter table public.expenses enable row level security;
 
--- Satu keluarga: semua user login boleh baca/tulis
+-- Monitoring publik (anon bisa baca). CRUD hanya untuk user yang login.
 create policy "profiles_select" on public.profiles for select to authenticated using (true);
 create policy "profiles_insert" on public.profiles for insert to authenticated with check (auth.uid() = id);
 create policy "profiles_update" on public.profiles for update to authenticated using (auth.uid() = id);
 
-create policy "settings_select" on public.settings for select to authenticated using (true);
+create policy "settings_select" on public.settings for select to anon, authenticated using (true);
 create policy "settings_update" on public.settings for update to authenticated using (true);
 
-create policy "members_all" on public.members for all to authenticated using (true) with check (true);
-create policy "contributions_all" on public.contributions for all to authenticated using (true) with check (true);
-create policy "expenses_all" on public.expenses for all to authenticated using (true) with check (true);
+create policy "members_select" on public.members for select to anon, authenticated using (true);
+create policy "members_insert" on public.members for insert to authenticated with check (true);
+create policy "members_update" on public.members for update to authenticated using (true) with check (true);
+create policy "members_delete" on public.members for delete to authenticated using (true);
+
+create policy "contributions_select" on public.contributions for select to anon, authenticated using (true);
+create policy "contributions_insert" on public.contributions for insert to authenticated with check (true);
+create policy "contributions_update" on public.contributions for update to authenticated using (true) with check (true);
+create policy "contributions_delete" on public.contributions for delete to authenticated using (true);
+
+create policy "expenses_select" on public.expenses for select to anon, authenticated using (true);
+create policy "expenses_insert" on public.expenses for insert to authenticated with check (true);
+create policy "expenses_update" on public.expenses for update to authenticated using (true) with check (true);
+create policy "expenses_delete" on public.expenses for delete to authenticated using (true);
 
 -- Auto-buat profil saat daftar
 create or replace function public.handle_new_user()

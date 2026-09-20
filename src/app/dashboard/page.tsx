@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AppHeader } from "@/components/app-header";
 import { ContributionForm, ExpenseForm } from "@/components/forms";
 import { HistoryList } from "@/components/history-list";
@@ -21,12 +22,15 @@ export default async function DashboardPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const isLoggedIn = Boolean(user);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user?.id ?? "")
-    .maybeSingle();
+  const { data: profile } = isLoggedIn
+    ? await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user!.id)
+        .maybeSingle()
+    : { data: null };
 
   const data = await getDashboardData(month, year);
 
@@ -35,6 +39,7 @@ export default async function DashboardPage({
       <AppHeader
         nenekName={data.settings.nenek_name}
         userName={profile?.full_name}
+        isLoggedIn={isLoggedIn}
       />
 
       <div className="shell mt-6 grid gap-5">
@@ -95,30 +100,48 @@ export default async function DashboardPage({
           />
         </section>
 
-        <section className="grid gap-5 lg:grid-cols-2">
-          <div className="panel p-5 sm:p-7">
+        {isLoggedIn ? (
+          <section className="grid gap-5 lg:grid-cols-2">
+            <div className="panel p-5 sm:p-7">
+              <h2
+                className="mb-4 text-xl"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                Input iuran
+              </h2>
+              <ContributionForm
+                members={data.members}
+                month={month}
+                year={year}
+              />
+            </div>
+            <div className="panel p-5 sm:p-7">
+              <h2
+                className="mb-4 text-xl"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                Input pengeluaran
+              </h2>
+              <ExpenseForm />
+            </div>
+          </section>
+        ) : (
+          <section className="panel p-5 sm:p-7">
             <h2
-              className="mb-4 text-xl"
+              className="mb-2 text-xl"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Input iuran
+              Input data
             </h2>
-            <ContributionForm
-              members={data.members}
-              month={month}
-              year={year}
-            />
-          </div>
-          <div className="panel p-5 sm:p-7">
-            <h2
-              className="mb-4 text-xl"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Input pengeluaran
-            </h2>
-            <ExpenseForm />
-          </div>
-        </section>
+            <p className="mb-4 text-[var(--ink-soft)]">
+              Monitoring bisa dilihat siapa saja. Untuk menambah, mengubah, atau
+              menghapus data, masuk dulu dengan akun keluarga.
+            </p>
+            <Link href="/login?next=/dashboard" className="btn btn-primary">
+              Masuk untuk edit
+            </Link>
+          </section>
+        )}
 
         <section className="panel p-5 sm:p-7">
           <h2
@@ -127,7 +150,7 @@ export default async function DashboardPage({
           >
             Riwayat
           </h2>
-          <HistoryList items={data.history} />
+          <HistoryList items={data.history} canEdit={isLoggedIn} />
         </section>
       </div>
     </main>

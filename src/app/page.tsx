@@ -1,15 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isSupabaseConfigured } from "@/lib/env";
-import { createClient } from "@/lib/supabase/server";
 
-export default async function HomePage() {
+export default function HomePage() {
   if (isSupabaseConfigured()) {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) redirect("/dashboard");
+    redirect("/dashboard");
   }
 
   return (
@@ -28,34 +22,23 @@ export default async function HomePage() {
           Catat iuran, pengeluaran, lihat saldo kas, riwayat, dan siapa yang
           sudah bayar — gratis untuk keluarga.
         </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          {isSupabaseConfigured() ? (
-            <>
-              <Link href="/login" className="btn btn-primary">
-                Masuk
-              </Link>
-              <Link href="/signup" className="btn btn-secondary">
-                Daftar
-              </Link>
-            </>
-          ) : (
-            <div className="max-w-xl rounded-2xl bg-white/70 p-4 text-sm text-[var(--ink-soft)]">
-              <p className="font-semibold text-[var(--ink)]">Setup dulu (sekali saja)</p>
-              <ol className="mt-2 list-decimal space-y-1 pl-4">
-                <li>Buat project gratis di supabase.com</li>
-                <li>Jalankan SQL di folder <code>supabase/schema.sql</code></li>
-                <li>
-                  Isi <code>.env.local</code> dari <code>.env.example</code>
-                </li>
-                <li>
-                  Restart <code>npm run dev</code>
-                </li>
-              </ol>
-              <p className="mt-3">
-                Panduan lengkap ada di <code>README.md</code>.
-              </p>
-            </div>
-          )}
+        <div className="mt-8 max-w-xl rounded-2xl bg-white/70 p-4 text-sm text-[var(--ink-soft)]">
+          <p className="font-semibold text-[var(--ink)]">Setup dulu (sekali saja)</p>
+          <ol className="mt-2 list-decimal space-y-1 pl-4">
+            <li>Buat project gratis di supabase.com</li>
+            <li>
+              Jalankan SQL di folder <code>supabase/schema.sql</code>
+            </li>
+            <li>
+              Isi <code>.env.local</code> dari <code>.env.example</code>
+            </li>
+            <li>
+              Restart <code>npm run dev</code>
+            </li>
+          </ol>
+          <p className="mt-3">
+            Panduan lengkap ada di <code>README.md</code>.
+          </p>
         </div>
       </section>
     </main>

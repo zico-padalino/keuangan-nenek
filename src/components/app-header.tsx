@@ -1,19 +1,23 @@
 import Link from "next/link";
 import { signOut } from "@/app/actions";
 
-const links = [
-  { href: "/dashboard", label: "Monitoring" },
-  { href: "/anggota", label: "Anggota" },
-  { href: "/pengaturan", label: "Pengaturan" },
-];
-
 export function AppHeader({
   nenekName,
   userName,
+  isLoggedIn = false,
 }: {
   nenekName: string;
   userName?: string;
+  isLoggedIn?: boolean;
 }) {
+  const links = isLoggedIn
+    ? [
+        { href: "/dashboard", label: "Monitoring" },
+        { href: "/anggota", label: "Anggota" },
+        { href: "/pengaturan", label: "Pengaturan" },
+      ]
+    : [{ href: "/dashboard", label: "Monitoring" }];
+
   return (
     <header className="shell pt-5 pb-2">
       <div className="panel flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -34,11 +38,17 @@ export function AppHeader({
               {link.label}
             </Link>
           ))}
-          <form action={signOut}>
-            <button type="submit" className="btn btn-secondary">
-              Keluar{userName ? ` · ${userName.split(" ")[0]}` : ""}
-            </button>
-          </form>
+          {isLoggedIn ? (
+            <form action={signOut}>
+              <button type="submit" className="btn btn-secondary">
+                Keluar{userName ? ` · ${userName.split(" ")[0]}` : ""}
+              </button>
+            </form>
+          ) : (
+            <Link href="/login?next=/dashboard" className="btn btn-primary">
+              Masuk untuk edit
+            </Link>
+          )}
         </nav>
       </div>
     </header>

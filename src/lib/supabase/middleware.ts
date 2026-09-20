@@ -34,10 +34,9 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isAuthPage = path === "/login" || path === "/signup";
+  // Monitoring (/dashboard) publik; login hanya untuk CRUD
   const isProtected =
-    path.startsWith("/dashboard") ||
-    path.startsWith("/anggota") ||
-    path.startsWith("/pengaturan");
+    path.startsWith("/anggota") || path.startsWith("/pengaturan");
 
   if (!user && isProtected) {
     const redirectUrl = request.nextUrl.clone();
